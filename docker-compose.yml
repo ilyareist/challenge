@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '5000:5000'
+    volumes:
+      - ./application:/app/application
+    depends_on:
+      - postgres
+    environment:
+      - LOGGERS_HANDLERS_LEVEL=DEBUG
+      - APP_HOST=0.0.0.0
+      - APP_PORT=5000
+      - DB_BIRTHDAY_URI=postgres://dbuser:dbpass@postgres:5432/birthday?application_name=birthday
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+          make run-dev
+    links:
+      - postgres
+    restart: on-failure
+
+  postgres:
+    image: postgres:latest
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=dbuser
+      - POSTGRES_PASSWORD=dbpass
+      - POSTGRES_DB=birthday

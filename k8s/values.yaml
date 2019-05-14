@@ -1,0 +1,44 @@
+
+##############################################################################################
+#This parameters will be used with helm template, to render templates from ./templates folder#
+#into .yaml files: configmap, deployment and service                                         #
+##############################################################################################
+
+app:
+  name: birthday
+  type: python
+  replicas: 1
+  prometheus:
+    scrape: '"true"'
+    port: '"5000"'
+
+  containers:
+    - name: server
+      command: " " 
+      args: ['"run-prod"']
+      poststart: " "
+      port: 5000
+      imagePullPolicy: Always
+      cmap: birthday-cmap
+      cmap_sec: birthday-cmap-sec
+      limits:
+        memory: 500Mi
+        cpu: 100m
+      requests:
+        memory: 70Mi
+        cpu: 10m
+service:
+  port: 5000
+  targetport: 5000
+
+#This values will be used to populate configmap, depends on environment.
+#Could be found in templates/configmap.yaml file on line 11
+envs:
+  test:
+    - name: SQLALCHEMY_DATABASE_URI
+      value: postgres://dbuser:dbpass@postgres:5432/birthday
+  prod:
+#We will not populate DATABASE_URI in configmap for production env, as it not secure.
+#Instead, this parameter is stored in kubernetes secrets and populates manually
+    - name: DEBUG
+      value: False

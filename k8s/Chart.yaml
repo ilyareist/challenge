@@ -1,0 +1,9 @@
+description: birthday service
+keywords:
+- python
+- birthday
+maintainers:
+- email: reistlin87@yandex.ru
+  name: Ilya Feoktistov
+name: birthday
+version: 1.0

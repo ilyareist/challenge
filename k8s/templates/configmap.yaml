@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.app.name }}-cmap
+  namespace: {{ .Values.namespace }}
+  labels:
+    name: {{ .Values.app.name }}
+    type: {{ .Values.app.type }}
+data:
+{{ $envs := pluck .Values.environment .Values.envs | first }}
+{{ range $i,$env := $envs }}
+  {{ .name }} : {{ .value | quote }}
+{{ end }}
+

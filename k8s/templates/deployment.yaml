@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+{{ $root := . }}
+kind: Deployment
+metadata:
+  name: {{ .Values.app.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+     kubernetes.io/change-cause: {{ .Values.commit | quote }}
+  labels:
+    app: {{ .Values.app.name }}
+    type: {{ .Values.app.type }}
+    commit: {{ .Values.commit | quote }}
+    commit_time: {{ .Values.commit_time }}
+    deploy_time: {{  date "02.01.2006_15-04-05" .Release.Time }}
+spec:
+  replicas: {{ .Values.app.replicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.app.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app.name }}
+        type: {{ .Values.app.type }}
+        commit: {{ .Values.commit | quote }}
+        commit_time: {{ .Values.commit_time }}
+        deploy_time: {{  date "02-01-2006_15-04-05" .Release.Time }}
+      annotations:
+        prometheus.io/scrape: {{ .Values.app.prometheus.scrape }}
+        prometheus.io/port: {{ .Values.app.prometheus.port }}
+    spec:
+      containers:
+      {{ $image_name := .Values.image }}
+      {{ $container_name := .Values.container_name }}
+      {{ $container_cmap := .Values.container_cmap }}
+      {{ range $i,$app := .Values.app.containers }}
+      - name: {{ $container_name | default .name }}
+        command: {{ .command }}
+        args: {{ .args }}
+        image: {{ $image_name }}
+        ports:
+        - containerPort: {{ .port }}
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - "sh"
+              - "-c"
+              - >
+                {{ .poststart }}
+        imagePullPolicy: {{ .imagePullPolicy }}
+        {{- if .liveness  }}
+          {{ if eq .liveness "true" }}
+        livenessProbe:
+          httpGet:
+            path: {{ .liveness_path }}
+            port: {{ .liveness_port }}
+          initialDelaySeconds: 45
+          timeoutSeconds: 2
+        readinessProbe:
+          httpGet:
+            path: {{ .liveness_path }}
+            port: {{ .liveness_port }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          {{ end }}
+        {{ end }}
+        envFrom:
+        - configMapRef:
+            name: {{ $container_cmap | default .cmap }}
+        - secretRef:
+            name: {{ .cmap_sec }}
+        resources:
+          limits:
+            memory: {{ .limits.memory }}
+            cpu: {{ .limits.cpu }}
+          requests:
+            memory: {{ .requests.memory }}
+            cpu: {{ .requests.cpu }} 
+      {{ end }} 
+      imagePullSecrets:
+      - name: my_registry
