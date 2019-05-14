@@ -18,7 +18,7 @@ $ pipenv shell
 # Install dependencies
 $ pipenv install
 
-# Run Server (http://localhst:5000) and db
+# Run tests, Server (http://localhst:5000) and db
 make run-dev
 
 #Stop Server and db
@@ -45,4 +45,4 @@ make test
 
 aws eks --region region update-kubeconfig --name cluster_name
 
-make run-prod
+make deploy-prod
