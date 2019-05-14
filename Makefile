@@ -19,12 +19,21 @@ run-local:
 .PHONY: run-prod
 run-prod:
 	@echo "Deploying to EKS"
+	python app.py
+
+.PHONY: deploy-prod
+deploy-prod:
+	@echo "Deploying to EKS"
 	./deploy.sh prod
+
 
 .PHONY: run-dev
 run-dev:
 	@echo -n "Run server for dev"
-	docker-compose up -d
+	docker-compose up -d postgres
+	sleep 5
+	py.test -svvv -rs -x
+	docker-compose up -d server
 
 .PHONY: stop-dev
 stop-dev:

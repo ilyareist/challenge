@@ -20,7 +20,7 @@ services:
       - /bin/sh
       - -c
       - |
-          make run-dev
+          python app.py
     links:
       - postgres
     restart: on-failure

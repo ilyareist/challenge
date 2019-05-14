@@ -9,6 +9,9 @@ case "$1" in
     NAMESPACE="prod1"
     AWS_REGION="eu-central-1"
     AWS_ECR="786743331197.dkr.ecr.eu-central-1.amazonaws.com/challenge/"
+ 
+    #Running tests
+    make test
 
     #Building helper container with helm and kubectl
     docker build -t k8s_utils:local -f Dockerfile_EKS .
