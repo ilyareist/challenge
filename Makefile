@@ -24,7 +24,7 @@ run-prod:
 .PHONY: run-dev
 run-dev:
 	@echo -n "Run server for dev"
-	./deploy.sh dev
+	docker-compose up -d
 
 .PHONY: stop-dev
 stop-dev:
